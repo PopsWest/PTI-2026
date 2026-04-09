@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class ArmStretchIK_Both : MonoBehaviour
 {
@@ -8,6 +8,10 @@ public class ArmStretchIK_Both : MonoBehaviour
         public Transform upperArm;
         public Transform lowerArm;
         public Transform handTarget;
+
+        // 👉 NOVO (physics hand)
+        public Rigidbody handRb;
+        public float followSpeed;
 
         [HideInInspector] public float originalUpperLength;
         [HideInInspector] public float originalLowerLength;
@@ -28,6 +32,12 @@ public class ArmStretchIK_Both : MonoBehaviour
         SetupArm(rightArm);
     }
 
+    void FixedUpdate()
+    {
+        UpdatePhysicsHand(leftArm);
+        UpdatePhysicsHand(rightArm);
+    }
+
     void LateUpdate()
     {
         UpdateArm(leftArm);
@@ -41,6 +51,15 @@ public class ArmStretchIK_Both : MonoBehaviour
 
         arm.upperOriginalScale = arm.upperArm.localScale;
         arm.lowerOriginalScale = arm.lowerArm.localScale;
+    }
+
+    // 👉 PHYSICS FOLLOW POR MÃO
+    void UpdatePhysicsHand(Arm arm)
+    {
+        if (arm.handRb == null || arm.handTarget == null) return;
+
+        Vector3 dir = arm.handTarget.position - arm.handRb.position;
+        arm.handRb.linearVelocity = dir * arm.followSpeed;
     }
 
     void UpdateArm(Arm arm)
