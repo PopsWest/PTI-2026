@@ -15,9 +15,9 @@ public class PosicaoPedra : MonoBehaviour
 
    void Start()
     {
-        for (int i = 0; i < posicao_inicial.Length; i++)
+        for (int i = 0; i < posicao_final.Length; i++)
         {
-            Instantiate(pedra, posicao_inicial[i]); 
+            Instantiate(pedra, posicao_final[i]); 
         }
         
     }
