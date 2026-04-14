@@ -18,9 +18,17 @@ public class Degrais : MonoBehaviour
     public float dificuldadeFacil = 3f;
     public float dificuldadeDificil = 0.8f;
 
+    [Header("alcance maximo do paciente (CM)")]
+    public float alcanceMaximoCM = 180f;
+
+    [Header("multiplicadores")]
+    [Range(0f, 1f)] public float facilMult = 0.4f;
+    [Range(0f, 1f)] public float medioMult = 0.7f;
+    [Range(0f, 1f)] public float dificilMult = 1f;
+
     void Start()
     {
-        GerarDegraus();
+
     }
 
     public void GerarDegraus()
@@ -31,15 +39,33 @@ public class Degrais : MonoBehaviour
             Destroy(child.gameObject);
         }
 
-        // pega dificuldade do slider
-        float diffSlider = GameSettings.Instance.difficulty;
+        if (posicaoComeco == null || posicaoFinal == null)
+        {
+            Debug.LogError("Referencias não setadas");
+            return;
+        }
 
-        // converte dificuldade
-        dificuldade = Mathf.Lerp(dificuldadeDificil, dificuldadeFacil, diffSlider);
+        float diff = GameSettings.Instance.difficulty;
+
+        float alcance = GameSettings.Instance.alcanceMaximoCM;
+
+        float dificuldadeCM;
+
+        if (diff == 0f)
+            dificuldadeCM = alcance * facilMult;
+        else if (diff == 0.5f)
+            dificuldadeCM = alcance * medioMult;
+        else
+            dificuldadeCM = alcance * dificilMult;
+
+        // evita zero
+        dificuldadeCM = Mathf.Max(10f, dificuldadeCM);
+
+        dificuldade = dificuldadeCM / 100f;
 
         float alturaTotal = posicaoFinal.position.y - posicaoComeco.position.y;
 
-        int quantidade = Mathf.FloorToInt(alturaTotal / dificuldade);
+        int quantidade = Mathf.Max(1, Mathf.FloorToInt(alturaTotal / dificuldade));
 
         float eixoX = posicaoComeco.position.x;
 

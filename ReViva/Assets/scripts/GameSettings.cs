@@ -4,10 +4,18 @@ public class GameSettings : MonoBehaviour
 {
     public static GameSettings Instance;
 
-    public float difficulty = 0.5f;
+    public float difficulty = 0f;
+    public float alcanceMaximoCM = 150f;
 
-    private void Awake()
+    void Awake()
     {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
         Instance = this;
+        DontDestroyOnLoad(gameObject);
     }
 }

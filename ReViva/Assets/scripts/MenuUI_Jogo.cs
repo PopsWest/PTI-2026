@@ -1,25 +1,24 @@
-using TMPro;
+ï»¿using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-public class MenuUI : MonoBehaviour
+public class MenuUI_Jogo : MonoBehaviour
 {
     public Slider difficultySlider;
     public TextMeshProUGUI difficultyText;
+
+    public TMP_InputField alcanceInput;
+
     public Degrais degrais;
 
-    // nomes das cenas (troca pelos seus nomes reais)
-    public string cenaMenu = "Menu";
-    public string cenaJogo = "EscaladaPrototipo";
 
     void Start()
     {
         string cenaAtual = SceneManager.GetActiveScene().name;
 
-        // Só roda isso na cena do jogo
-        if (cenaAtual == cenaJogo)
-        {
+
+
             difficultySlider.wholeNumbers = true;
             difficultySlider.minValue = 0;
             difficultySlider.maxValue = 2;
@@ -34,24 +33,22 @@ public class MenuUI : MonoBehaviour
                 difficultySlider.value = 2;
 
             AtualizarTexto();
-        }
+
+            // carrega alcance salvo
+            alcanceInput.text = GameSettings.Instance.alcanceMaximoCM.ToString("0");
+
     }
 
     public void OnSliderChanged()
     {
-        string cenaAtual = SceneManager.GetActiveScene().name;
-
-        if (cenaAtual != cenaJogo) return;
+       
 
         AtualizarTexto();
-        degrais.GerarDegraus();
     }
 
     void AtualizarTexto()
     {
-        string cenaAtual = SceneManager.GetActiveScene().name;
 
-        if (cenaAtual != cenaJogo) return;
 
         int diff = (int)difficultySlider.value;
 
@@ -60,17 +57,17 @@ public class MenuUI : MonoBehaviour
         switch (diff)
         {
             case 0:
-                nivel = "Fácil";
+                nivel = "FÃ¡cil";
                 GameSettings.Instance.difficulty = 0f;
                 break;
 
             case 1:
-                nivel = "Médio";
+                nivel = "MÃ©dio";
                 GameSettings.Instance.difficulty = 0.5f;
                 break;
 
             case 2:
-                nivel = "Difícil";
+                nivel = "DifÃ­cil";
                 GameSettings.Instance.difficulty = 1f;
                 break;
         }
@@ -78,32 +75,25 @@ public class MenuUI : MonoBehaviour
         difficultyText.text = nivel;
     }
 
-    // Essas funções só funcionam na cena do menu
-    public void ReViva()
+    // ðŸ”¥ atualiza alcance digitado
+    public void AtualizarAlcance()
     {
-        if (SceneManager.GetActiveScene().name == cenaMenu)
+
+
+        float valor;
+
+        if (float.TryParse(alcanceInput.text, out valor))
         {
-            Application.OpenURL("https://www.instagram.com/revivavr/?utm_source=ig_web_button_share_sheet");
+            GameSettings.Instance.alcanceMaximoCM = valor;
         }
     }
 
-    public void QuitGame()
+    // ðŸ”¥ botÃ£o pra regenerar
+    public void RegenerarDegraus()
     {
-        if (SceneManager.GetActiveScene().name == cenaMenu)
-        {
-#if UNITY_EDITOR
-            UnityEditor.EditorApplication.isPlaying = false;
-#else
-        Application.Quit();
-#endif
-        }
-    }
+        Debug.Log("BOTÃƒO FUNCIONOU");
 
-    public void StartGame()
-    {
-        if (SceneManager.GetActiveScene().name == cenaMenu)
-        {
-            SceneManager.LoadScene("EscaladaPrototipo");
-        }
+        AtualizarAlcance();
+        degrais.GerarDegraus();
     }
 }

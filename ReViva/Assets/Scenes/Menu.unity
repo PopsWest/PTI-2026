@@ -202,7 +202,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 132451362}
+      - m_Target: {fileID: 132451365}
         m_TargetAssemblyTypeName: MenuUI, Assembly-CSharp
         m_MethodName: StartGame
         m_Mode: 1
@@ -473,7 +473,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 132451363}
-  - component: {fileID: 132451362}
+  - component: {fileID: 132451365}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -481,21 +481,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &132451362
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 132451361}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d465dfb7a10ce0947baf74222d45a30b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  difficultySlider: {fileID: 0}
-  difficultyText: {fileID: 0}
-  degrais: {fileID: 0}
 --- !u!4 &132451363
 Transform:
   m_ObjectHideFlags: 0
@@ -511,6 +496,20 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &132451365
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 132451361}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d465dfb7a10ce0947baf74222d45a30b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cenaMenu: Menu
+  cenaJogo: EscaladaPrototipo
 --- !u!1 &410087039
 GameObject:
   m_ObjectHideFlags: 0
@@ -1690,7 +1689,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 132451362}
+      - m_Target: {fileID: 132451365}
         m_TargetAssemblyTypeName: MenuUI, Assembly-CSharp
         m_MethodName: ReViva
         m_Mode: 1
@@ -1823,7 +1822,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 132451362}
+      - m_Target: {fileID: 132451365}
         m_TargetAssemblyTypeName: MenuUI, Assembly-CSharp
         m_MethodName: QuitGame
         m_Mode: 1
