@@ -10,21 +10,20 @@ public class GoniometriaClimb : MonoBehaviour
 
     [Header("Detecção de pegada")]
     public float distanciaPegada = 0.15f;
-    
 
     [Header("Configuração corporal")]
     public float ombroAlturaOffset = -0.2f;
     public float ombroLateralOffset = 0.15f;
-    public float proporcaoBraco = 0.5f;
 
-    [Header("DEBUG VISUAL")]
-    public GameObject particlePrefab;
+    [Header("Calibração automática")]
+    public float alcanceMaximo = 0.5f; // começa baixo e cresce
+    public float suavizacao = 0.1f;
 
-    GameObject headMarker;
-    GameObject shoulderRMarker;
-    GameObject shoulderLMarker;
-    GameObject elbowRMarker;
-    GameObject elbowLMarker;
+    private float melhorDir = 0f;
+    private float melhorEsq = 0f;
+
+    private float ultimoAlcanceDir = 0f;
+    private float ultimoAlcanceEsq = 0f;
 
     private List<float> rightPeaks = new List<float>();
     private List<float> leftPeaks = new List<float>();
@@ -35,7 +34,7 @@ public class GoniometriaClimb : MonoBehaviour
     private float currentRightPeak = 0f;
     private float currentLeftPeak = 0f;
 
-    float alcanceMaximo;
+    public bool calibrado = false;
 
     public struct ResultadoSessao
     {
@@ -44,40 +43,52 @@ public class GoniometriaClimb : MonoBehaviour
         public string diagnostico;
     }
 
-    void Start()
-    {
-        alcanceMaximo = GameSettings.Instance.alcanceMaximoCM / 100f;
-
-        // cria marcadores
-        headMarker = Instantiate(particlePrefab);
-        shoulderRMarker = Instantiate(particlePrefab);
-        shoulderLMarker = Instantiate(particlePrefab);
-        elbowRMarker = Instantiate(particlePrefab);
-        elbowLMarker = Instantiate(particlePrefab);
-    }
-
     void Update()
     {
-        Vector3 shoulderR = GetShoulder(true);
-        Vector3 shoulderL = GetShoulder(false);
+        AtualizarCalibracaoAutomatica();
 
-        Vector3 elbowR = GetElbow(shoulderR, handRight.position);
-        Vector3 elbowL = GetElbow(shoulderL, handLeft.position);
+        if (alcanceMaximo > 0.5f)
+        {
+            calibrado = true;
+        }
 
-        // -------- ATUALIZA PARTICULAS --------
-        headMarker.transform.position = head.position;
-
-        shoulderRMarker.transform.position = shoulderR;
-        shoulderLMarker.transform.position = shoulderL;
-
-        elbowRMarker.transform.position = elbowR;
-        elbowLMarker.transform.position = elbowL;
-
-        // -------- LÓGICA NORMAL --------
         ProcessHand(handRight, true, ref rightGrabbing, ref currentRightPeak, rightPeaks);
         ProcessHand(handLeft, false, ref leftGrabbing, ref currentLeftPeak, leftPeaks);
     }
 
+    // -------- AUTO CALIBRAÇÃO --------
+    void AtualizarCalibracaoAutomatica()
+    {
+        Vector3 shoulderR = GetShoulder(true);
+        Vector3 shoulderL = GetShoulder(false);
+
+        float alcanceDir = Vector3.Distance(shoulderR, handRight.position);
+        float alcanceEsq = Vector3.Distance(shoulderL, handLeft.position);
+
+        // detectar movimento de subida
+        bool subindoDir = alcanceDir > ultimoAlcanceDir;
+        bool subindoEsq = alcanceEsq > ultimoAlcanceEsq;
+
+        // só aceita se mão estiver acima do ombro (alcance real)
+        if (handRight.position.y > shoulderR.y && subindoDir)
+        {
+            if (alcanceDir > melhorDir)
+                melhorDir = Mathf.Lerp(melhorDir, alcanceDir, suavizacao);
+        }
+
+        if (handLeft.position.y > shoulderL.y && subindoEsq)
+        {
+            if (alcanceEsq > melhorEsq)
+                melhorEsq = Mathf.Lerp(melhorEsq, alcanceEsq, suavizacao);
+        }
+
+        alcanceMaximo = Mathf.Max(melhorDir, melhorEsq);
+
+        ultimoAlcanceDir = alcanceDir;
+        ultimoAlcanceEsq = alcanceEsq;
+    }
+
+    // -------- OMBRO --------
     Vector3 GetShoulder(bool right)
     {
         Vector3 pos = head.position;
@@ -92,18 +103,7 @@ public class GoniometriaClimb : MonoBehaviour
         return pos;
     }
 
-    Vector3 GetElbow(Vector3 shoulder, Vector3 hand)
-    {
-        Vector3 mid = Vector3.Lerp(shoulder, hand, proporcaoBraco);
-
-        Vector3 dir = (hand - shoulder).normalized;
-        Vector3 perpendicular = Vector3.Cross(dir, Vector3.up);
-
-        float curvatura = 0.1f;
-
-        return mid + perpendicular * curvatura;
-    }
-
+    // -------- PROCESSAMENTO --------
     void ProcessHand(Transform hand, bool isRight, ref bool grabbing, ref float currentPeak, List<float> lista)
     {
         bool tocando = Physics.CheckSphere(hand.position, distanciaPegada);
@@ -129,15 +129,16 @@ public class GoniometriaClimb : MonoBehaviour
         }
     }
 
+    // -------- RESULTADOS --------
     public ResultadoSessao GetResultados()
     {
+        ResultadoSessao r;
+
         float mediaDir = Media(rightPeaks);
         float mediaEsq = Media(leftPeaks);
 
-        float percDir = (mediaDir / alcanceMaximo) * 100f;
-        float percEsq = (mediaEsq / alcanceMaximo) * 100f;
-
-        ResultadoSessao r;
+        float percDir = Mathf.Clamp((mediaDir / alcanceMaximo) * 100f, 0f, 100f);
+        float percEsq = Mathf.Clamp((mediaEsq / alcanceMaximo) * 100f, 0f, 100f);
 
         r.percDireito = percDir;
         r.percEsquerdo = percEsq;
