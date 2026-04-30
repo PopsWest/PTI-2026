@@ -1,4 +1,15 @@
-﻿using TMPro;
+﻿// MENUUI_Jogo.cs (CORRIGIDO)
+// O erro acontece porque no Degrais atual NÃO EXISTE mais:
+// degrais.distanciaVertical
+//
+// Agora quem controla isso é:
+// GameSettings.Instance.alcanceMaximoCM
+// + GameSettings.Instance.difficulty
+//
+// Então o MenuUI só precisa atualizar o slider (%)
+// e mandar regenerar.
+
+using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -48,9 +59,6 @@ public class MenuUI_Jogo : MonoBehaviour
     public string cenaMenu = "Menu";
     public string cenaJogo = "EscaladaPrototipo";
 
-    // ─────────────────────────────────────────────
-    // INIT
-    // ─────────────────────────────────────────────
     void Start()
     {
         if (SceneManager.GetActiveScene().name != cenaJogo) return;
@@ -58,14 +66,22 @@ public class MenuUI_Jogo : MonoBehaviour
         if (goniometria == null)
             goniometria = FindObjectOfType<GoniometriaClimb>();
 
-        // slider contínuo
-        difficultySlider.minValue = 0.4f; // fácil
-        difficultySlider.maxValue = 1f;   // difícil
+        // Slider contínuo de 40% a 100%
+        difficultySlider.minValue = 0.4f;
+        difficultySlider.maxValue = 1f;
         difficultySlider.wholeNumbers = false;
 
-        difficultySlider.value = 0.7f; // padrão médio
+        // valor inicial
+        difficultySlider.value = 0.7f;
+
+        // salva no sistema global
+        GameSettings.Instance.difficulty = difficultySlider.value;
 
         AtualizarTextoDificuldade();
+
+        // Quando calibrar, gera automaticamente
+        if (goniometria != null)
+            goniometria.OnCalibracaoConcluida += RegenerarDegraus;
     }
 
     void Update()
@@ -89,14 +105,23 @@ public class MenuUI_Jogo : MonoBehaviour
         if (goniometria.calibrando)
         {
             statusCalibracao.text = goniometria.faseAtual;
+
+            if (barraProgressoCalibracao != null)
+                barraProgressoCalibracao.value = goniometria.progressoCalibracao;
         }
         else if (goniometria.calibrado)
         {
             statusCalibracao.text = $"✔ Calibrado ({goniometria.alcanceMaximo * 100f:F0} cm)";
+
+            if (barraProgressoCalibracao != null)
+                barraProgressoCalibracao.value = 1f;
         }
         else
         {
             statusCalibracao.text = "⚠ Não calibrado";
+
+            if (barraProgressoCalibracao != null)
+                barraProgressoCalibracao.value = 0f;
         }
     }
 
@@ -116,30 +141,29 @@ public class MenuUI_Jogo : MonoBehaviour
     // ─────────────────────────────────────────────
     public void OnSliderChanged()
     {
+        // salva dificuldade como valor real (0.4 até 1.0)
+        GameSettings.Instance.difficulty = difficultySlider.value;
+
         AtualizarTextoDificuldade();
-        AtualizarDegraus();
+
+        // se já calibrado, regenera instantaneamente
+        if (goniometria != null && goniometria.calibrado)
+            RegenerarDegraus();
     }
 
     void AtualizarTextoDificuldade()
     {
-        float valor = difficultySlider.value;
-
-        int porcentagem = Mathf.RoundToInt(valor * 100f);
+        int porcentagem = Mathf.RoundToInt(difficultySlider.value * 100f);
         difficultyText.text = $"Dificuldade: {porcentagem}%";
     }
 
-    void AtualizarDegraus()
+    // ─────────────────────────────────────────────
+    // GERAR DEGRAUS
+    // ─────────────────────────────────────────────
+    public void RegenerarDegraus()
     {
-        if (!goniometria.calibrado) return;
+        if (degrais == null) return;
 
-        float alcance = goniometria.alcanceMaximo;
-
-        float dificuldade = difficultySlider.value;
-
-        // 🔥 aqui é o segredo
-        float distanciaFinal = alcance * dificuldade;
-
-        degrais.distanciaVertical = distanciaFinal;
         degrais.GerarDegraus();
     }
 
@@ -148,18 +172,34 @@ public class MenuUI_Jogo : MonoBehaviour
     // ─────────────────────────────────────────────
     public void FinalizarSessao()
     {
+        if (goniometria == null) return;
+
         var r = goniometria.GetResultados();
 
-        resultadoDireito.text = $"Direito: {r.percDireito:F1}%";
-        resultadoEsquerdo.text = $"Esquerdo: {r.percEsquerdo:F1}%";
+        resultadoDireito.text =
+            $"Direito: {r.percDireito:F1}% ({r.alcanceMaximoCM:F0}cm máx)";
+
+        resultadoEsquerdo.text =
+            $"Esquerdo: {r.percEsquerdo:F1}% ({r.alcanceMaximoCM:F0}cm máx)";
+
         diagnostico.text = r.diagnostico;
     }
 
     // ─────────────────────────────────────────────
-    // BOTÃO EXTRA (OPCIONAL)
+    // MENU
     // ─────────────────────────────────────────────
-    public void RegenerarDegraus()
+    public void StartGame()
     {
-        AtualizarDegraus();
+        if (SceneManager.GetActiveScene().name == cenaMenu)
+            SceneManager.LoadScene(cenaJogo);
+    }
+
+    public void QuitGame()
+    {
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
+        Application.Quit();
+#endif
     }
 }

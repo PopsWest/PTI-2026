@@ -1,9 +1,32 @@
+// GoniometriaClimb.cs (CALIBRAÇÃO CORRIGIDA PARA ALCANCE REAL)
+//
+// PROBLEMA:
+// Você estava medindo:
+// ombro → mão
+//
+// Isso mede só o braço.
+//
+// MAS no exercício de escalada/reabilitação o alcance funcional real inclui:
+// extensão de tronco + ombro + braço
+//
+// Então o certo é medir:
+// mão relaxada (baixo) → mão elevada (máximo)
+//
+// Isso normalmente dá ~120–150cm dependendo da pessoa,
+// em vez de 70–85cm.
+//
+// CALIBRAÇÃO NOVA:
+// Fase 1 = salva posição relaxada de cada mão
+// Fase 2 = mede a maior distância entre posição relaxada e posição máxima
+//
+// Isso corrige drasticamente o valor clínico.
+
 using UnityEngine;
-using System.Collections.Generic;
 
 public class GoniometriaClimb : MonoBehaviour
 {
-    [Header("Referências")]
+    [Header("Referências VR")]
+    public Transform head;
     public Transform handRight;
     public Transform handLeft;
 
@@ -11,26 +34,30 @@ public class GoniometriaClimb : MonoBehaviour
     public float tempoRelaxado = 2f;
     public float tempoMaximo = 3f;
 
+    [Header("Estado")]
     public bool calibrando = false;
     public bool calibrado = false;
 
     public float progressoCalibracao = 0f;
     public string faseAtual = "";
 
+    [Tooltip("Amplitude funcional máxima em metros")]
     public float alcanceMaximo = 0f;
 
-    // estados
-    float timer = 0f;
-    int fase = 0;
-
-    float maxRight = 0f;
-    float maxLeft = 0f;
-
-    // tempo real
     public float alcanceAtualDir { get; private set; }
     public float alcanceAtualEsq { get; private set; }
 
-    public Transform head;
+    public System.Action OnCalibracaoConcluida;
+
+    // Estado interno
+    private int fase = 0;
+    private float timer = 0f;
+
+    private Vector3 relaxRight;
+    private Vector3 relaxLeft;
+
+    private float maxRight = 0f;
+    private float maxLeft = 0f;
 
     void Update()
     {
@@ -42,13 +69,14 @@ public class GoniometriaClimb : MonoBehaviour
 
         if (!calibrado) return;
 
-        alcanceAtualDir = Vector3.Distance(head.position, handRight.position);
-        alcanceAtualEsq = Vector3.Distance(head.position, handLeft.position);
+        // Uso em tempo real = quanto da amplitude total está usando AGORA
+        alcanceAtualDir = Vector3.Distance(relaxRight, handRight.position);
+        alcanceAtualEsq = Vector3.Distance(relaxLeft, handLeft.position);
     }
 
-    // ─────────────────────────────
-    // CALIBRAÇÃO GUIADA
-    // ─────────────────────────────
+    // ─────────────────────────────────────────────
+    // INICIAR CALIBRAÇÃO
+    // ─────────────────────────────────────────────
     public void IniciarCalibracaoManual()
     {
         calibrando = true;
@@ -60,65 +88,87 @@ public class GoniometriaClimb : MonoBehaviour
         maxRight = 0f;
         maxLeft = 0f;
 
-        Debug.Log("▶ Iniciando calibração guiada");
+        progressoCalibracao = 0f;
+        faseAtual = "Prepare-se...";
     }
 
+    // ─────────────────────────────────────────────
+    // CALIBRAÇÃO GUIADA
+    // ─────────────────────────────────────────────
     void CalibracaoGuiada()
     {
         timer += Time.deltaTime;
 
-        // FASE 0: RELAXADO
+        // FASE 0 = RELAXADO
         if (fase == 0)
         {
-            faseAtual = "Deixe os braços relaxados";
-
+            faseAtual = "Deixe os braços relaxados ao lado do corpo";
             progressoCalibracao = timer / tempoRelaxado;
 
             if (timer >= tempoRelaxado)
             {
+                // Salva posição relaxada REAL
+                relaxRight = handRight.position;
+                relaxLeft = handLeft.position;
+
                 timer = 0f;
                 fase = 1;
             }
         }
 
-        // FASE 1: MÁXIMO
+        // FASE 1 = ELEVAR MÁXIMO
         else if (fase == 1)
         {
-            faseAtual = "Levante os braços ao máximo";
-
+            faseAtual = "Levante os braços o máximo possível";
             progressoCalibracao = timer / tempoMaximo;
 
-            float r = Vector3.Distance(head.position, handRight.position);
-            float l = Vector3.Distance(head.position, handLeft.position);
+            float r = Vector3.Distance(relaxRight, handRight.position);
+            float l = Vector3.Distance(relaxLeft, handLeft.position);
 
             if (r > maxRight) maxRight = r;
             if (l > maxLeft) maxLeft = l;
 
             if (timer >= tempoMaximo)
             {
-                alcanceMaximo = Mathf.Max(maxRight, maxLeft);
-
-                calibrando = false;
-                calibrado = true;
-
-                Debug.Log("✔ Calibrado: " + (alcanceMaximo * 100f) + " cm");
+                EncerrarCalibracao();
             }
         }
     }
 
-    // ─────────────────────────────
+    // ─────────────────────────────────────────────
+    // FINALIZAR
+    // ─────────────────────────────────────────────
+    void EncerrarCalibracao()
+    {
+        alcanceMaximo = Mathf.Max(maxRight, maxLeft);
+
+        calibrando = false;
+        calibrado = true;
+
+        GameSettings.Instance.alcanceMaximoCM = alcanceMaximo * 100f;
+
+        Debug.Log(
+            $"✔ Calibrado | Dir={maxRight * 100f:F1}cm | Esq={maxLeft * 100f:F1}cm | Máx={alcanceMaximo * 100f:F1}cm"
+        );
+
+        OnCalibracaoConcluida?.Invoke();
+    }
+
+    // ─────────────────────────────────────────────
     // TEMPO REAL
-    // ─────────────────────────────
+    // ─────────────────────────────────────────────
     public float GetUsoAtualDir()
     {
-        if (!calibrado) return 0;
-        return (alcanceAtualDir / alcanceMaximo) * 100f;
+        if (!calibrado || alcanceMaximo <= 0f) return 0f;
+
+        return Mathf.Clamp((alcanceAtualDir / alcanceMaximo) * 100f, 0f, 100f);
     }
 
     public float GetUsoAtualEsq()
     {
-        if (!calibrado) return 0;
-        return (alcanceAtualEsq / alcanceMaximo) * 100f;
+        if (!calibrado || alcanceMaximo <= 0f) return 0f;
+
+        return Mathf.Clamp((alcanceAtualEsq / alcanceMaximo) * 100f, 0f, 100f);
     }
 
     // ─────────────────────────────────────────────
@@ -128,6 +178,7 @@ public class GoniometriaClimb : MonoBehaviour
     {
         public float percDireito;
         public float percEsquerdo;
+        public float alcanceMaximoCM;
         public string diagnostico;
     }
 
@@ -135,11 +186,10 @@ public class GoniometriaClimb : MonoBehaviour
     {
         ResultadoSessao r;
 
-        float percDir = GetUsoAtualDir();
-        float percEsq = GetUsoAtualEsq();
+        r.percDireito = GetUsoAtualDir();
+        r.percEsquerdo = GetUsoAtualEsq();
 
-        r.percDireito = Mathf.Clamp(percDir, 0f, 100f);
-        r.percEsquerdo = Mathf.Clamp(percEsq, 0f, 100f);
+        r.alcanceMaximoCM = alcanceMaximo * 100f;
 
         r.diagnostico = GerarDiagnostico(r.percDireito, r.percEsquerdo);
 
@@ -151,10 +201,13 @@ public class GoniometriaClimb : MonoBehaviour
         float diff = Mathf.Abs(dir - esq);
 
         if (diff > 15f)
-            return "⚠ Assimetria funcional detectada";
+        {
+            string ladoFraco = dir < esq ? "Direito" : "Esquerdo";
+            return $"⚠ Assimetria funcional — lado {ladoFraco}";
+        }
 
         if (dir < 70f || esq < 70f)
-            return "⚠ Amplitude abaixo do ideal";
+            return "⚠ Amplitude abaixo do ideal clínico";
 
         return "✔ Movimento dentro do esperado";
     }
