@@ -16,6 +16,7 @@ using UnityEngine.UI;
 
 public class MenuUI_Jogo : MonoBehaviour
 {
+
     // ─────────────────────────────────────────────
     // CONFIGURAÇÃO DE DIFICULDADE
     // ─────────────────────────────────────────────
@@ -59,8 +60,18 @@ public class MenuUI_Jogo : MonoBehaviour
     public string cenaMenu = "Menu";
     public string cenaJogo = "EscaladaPrototipo";
 
+    [Header("Modo de Alcance")]
+    public Toggle toggleMetadeAlcance;
+
     void Start()
     {
+
+        if (toggleMetadeAlcance != null)
+        {
+            toggleMetadeAlcance.onValueChanged.AddListener(OnToggleAlcance);
+        }
+
+
         if (SceneManager.GetActiveScene().name != cenaJogo) return;
 
         if (goniometria == null)
@@ -188,18 +199,11 @@ public class MenuUI_Jogo : MonoBehaviour
     // ─────────────────────────────────────────────
     // MENU
     // ─────────────────────────────────────────────
-    public void StartGame()
-    {
-        if (SceneManager.GetActiveScene().name == cenaMenu)
-            SceneManager.LoadScene(cenaJogo);
-    }
 
-    public void QuitGame()
+    public void OnToggleAlcance(bool metade)
     {
-#if UNITY_EDITOR
-        UnityEditor.EditorApplication.isPlaying = false;
-#else
-        Application.Quit();
-#endif
+        GameSettings.Instance.usarMetadeDoAlcance = metade;
+
+        Degrais.Instance.GerarDegraus();
     }
 }

@@ -7,6 +7,8 @@ public class GameSettings : MonoBehaviour
     public float difficulty = 0f;
     public float alcanceMaximoCM = 150f;
 
+    public bool usarMetadeDoAlcance = false;
+
     void Awake()
     {
         if (Instance != null && Instance != this)

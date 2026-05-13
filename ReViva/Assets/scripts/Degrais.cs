@@ -2,109 +2,196 @@
 
 public class Degrais : MonoBehaviour
 {
+    public static Degrais Instance;
+
     [Header("Referências de Cena")]
     public Transform posicaoComeco;
     public Transform posicaoFinal;
     public GameObject pedra;
 
-    // ─────────────────────────────────────────────────────────────
-    //  COMO O CÁLCULO FUNCIONA
-    //
-    //  alcanceMaximoCM vem de GameSettings (salvo pela calibração).
-    //  Ex: paciente com 76cm de alcance.
-    //
-    //  Cada dificuldade define QUAL PERCENTUAL do alcance máximo
-    //  é exigido para chegar na próxima pedra:
-    //
-    //    Fácil:  60% de 76cm = 45cm  → pedra a cada 0.45m
-    //    Médio:  80% de 76cm = 61cm  → pedra a cada 0.61m
-    //    Difícil: 95% de 76cm = 72cm → pedra a cada 0.72m
-    //
-    //  A posição HORIZONTAL é FIXA e alternada (esquerda/direita),
-    //  nunca aleatória. Isso garante que toda pedra está sempre
-    //  na mesma distância lateral previsível.
-    // ─────────────────────────────────────────────────────────────
+    [Header("Layer da Montanha")]
+    public LayerMask layerMontanha;
 
-    [Header("Percentual do alcance exigido por dificuldade")]
-    [Tooltip("Fácil: % do alcance máximo para chegar na próxima pedra")]
-    [Range(0.3f, 0.7f)] public float percentualFacil = 0.60f;
-
-    [Tooltip("Médio: % do alcance máximo")]
-    [Range(0.5f, 0.9f)] public float percentualMedio = 0.80f;
-
-    [Tooltip("Difícil: % do alcance máximo")]
-    [Range(0.7f, 1.0f)] public float percentualDificil = 0.95f;
-
-    [Header("Posição horizontal fixa das pedras (metros do centro)")]
-    [Tooltip("Distância do centro para o lado direito/esquerdo. Fixa, sem aleatoriedade.")]
+    [Header("Distância horizontal das pedras")]
     public float offsetHorizontal = 0.30f;
 
-    // ─────────────────────────────────────────────────────────────
-    //  GERAR DEGRAUS
-    // ─────────────────────────────────────────────────────────────
+    [Header("Distância do raycast")]
+    public float distanciaRaycast = 20f;
 
+    void Awake()
+    {
+        Instance = this;
+    }
+
+    // ─────────────────────────────────────────────
+    // GERAR PEDRAS
+    // ─────────────────────────────────────────────
     public void GerarDegraus()
     {
-        // Limpa pedras antigas
+        // limpa antigas
         foreach (Transform child in transform)
             Destroy(child.gameObject);
 
         if (posicaoComeco == null || posicaoFinal == null)
         {
-            Debug.LogError("[Degrais] posicaoComeco ou posicaoFinal não estão setados!");
+            Debug.LogError("Posições não configuradas.");
             return;
         }
 
-        // ── 1. Ler alcance calibrado do GameSettings ──
+        // alcance calibrado
         float alcanceCM = GameSettings.Instance.alcanceMaximoCM;
 
-        if (alcanceCM < 10f)
+        if (GameSettings.Instance.usarMetadeDoAlcance)
         {
-            Debug.LogWarning("[Degrais] alcanceMaximoCM muito baixo ou zero. " +
-                             "Calibração foi feita? Usando fallback de 60cm.");
-            alcanceCM = 60f;
+            alcanceCM *= 0.5f;
         }
 
-        // ── 2. Calcular distância vertical com base na dificuldade ──
-        float diff = GameSettings.Instance.difficulty;
-        float percentual = diff < 0.33f ? percentualFacil
-                          : diff < 0.66f ? percentualMedio
-                          : percentualDificil;
+        if (alcanceCM <= 0f)
+            alcanceCM = 130f;
 
-        // Converte CM → metros para a cena Unity
-        float distanciaVertical = (alcanceCM * percentual) / 100f;
+        // dificuldade agora é percentual direto
+        float percentual = GameSettings.Instance.difficulty;
 
-        string nomeDiff = diff < 0.33f ? "Fácil" : diff < 0.66f ? "Médio" : "Difícil";
-        Debug.Log($"[Degrais] Gerando degraus: " +
-                  $"AlcanceMax={alcanceCM:F1}cm  " +
-                  $"Dificuldade={nomeDiff} ({percentual * 100f:F0}%)  " +
-                  $"→ DistânciaVertical={distanciaVertical * 100f:F1}cm por pedra");
+        // cm → metros
+        float alcanceMetros = alcanceCM / 100f;
 
-        // ── 3. Spawnar pedras com posição FIXA alternada ──
-        float alturaFinal = posicaoFinal.position.y;
-        float centroX = posicaoComeco.position.x;
-        float z = posicaoComeco.position.z;
+        // distância entre pedras
+        float distanciaVertical = alcanceMetros * percentual;
+
+        Debug.Log(
+            $"[Degrais] Alcance={alcanceCM:F1}cm  " +
+            $"Dificuldade={percentual * 100f:F0}%  " +
+            $"Distância={distanciaVertical:F2}m"
+        );
+
         float y = posicaoComeco.position.y;
+        float alturaFinal = posicaoFinal.position.y;
+
+        float centroX = posicaoComeco.position.x;
+        float centroZ = posicaoComeco.position.z;
+
         int index = 0;
 
         while (y < alturaFinal)
         {
             y += distanciaVertical;
-            if (y > alturaFinal) break;
 
-            // Alternância fixa: par = direita, ímpar = esquerda
+            if (y > alturaFinal)
+                break;
+
+            // alterna lados
             float x = (index % 2 == 0)
                 ? centroX + offsetHorizontal
                 : centroX - offsetHorizontal;
 
-            Instantiate(pedra,
-                        new Vector3(x, y, z),
-                        Quaternion.identity,
-                        transform);
-            index++;
+            Vector3 centroBusca = new Vector3(x, y, centroZ);
+
+            bool encontrou = false;
+            RaycastHit hit = new RaycastHit();
+
+            // ─────────────────────────────────────────────
+            // RAYCASTS 4 DIREÇÕES
+            // ─────────────────────────────────────────────
+
+            Vector3[] direcoes =
+            {
+                Vector3.forward,
+                Vector3.back,
+                Vector3.right,
+                Vector3.left
+            };
+
+            foreach (Vector3 dir in direcoes)
+            {
+                Vector3 origem = centroBusca - dir * 5f;
+
+                if (Physics.Raycast(
+                    origem,
+                    dir,
+                    out hit,
+                    distanciaRaycast,
+                    layerMontanha
+                ))
+                {
+                    encontrou = true;
+                    break;
+                }
+            }
+
+            // ─────────────────────────────────────────────
+            // SE ACHOU SUPERFÍCIE
+            // ─────────────────────────────────────────────
+
+            if (encontrou)
+            {
+                Vector3 posicaoPedra = hit.point;
+
+                // empurra levemente pra fora
+                posicaoPedra += hit.normal * 0.03f;
+
+                // rotação alinhada na parede
+                Quaternion rot =
+                    Quaternion.LookRotation(-hit.normal);
+
+                Instantiate(
+                    pedra,
+                    posicaoPedra,
+                    rot,
+                    transform
+                );
+
+                index++;
+            }
         }
 
-        Debug.Log($"[Degrais] {index} pedras geradas entre " +
-                  $"y={posicaoComeco.position.y:F2} e y={alturaFinal:F2}");
+        Debug.Log($"[Degrais] {index} pedras geradas.");
+    }
+
+    // ─────────────────────────────────────────────
+    // DEBUG VISUAL
+    // ─────────────────────────────────────────────
+    void OnDrawGizmosSelected()
+    {
+        if (posicaoComeco == null || posicaoFinal == null)
+            return;
+
+        Gizmos.color = Color.green;
+
+        float alcanceCM = Application.isPlaying
+            ? GameSettings.Instance.alcanceMaximoCM
+            : 130f;
+
+        float percentual = Application.isPlaying
+            ? GameSettings.Instance.difficulty
+            : 0.8f;
+
+        float distanciaVertical =
+            (alcanceCM / 100f) * percentual;
+
+        float y = posicaoComeco.position.y;
+        float alturaFinal = posicaoFinal.position.y;
+
+        float centroX = posicaoComeco.position.x;
+        float centroZ = posicaoComeco.position.z;
+
+        int index = 0;
+
+        while (y < alturaFinal)
+        {
+            y += distanciaVertical;
+
+            if (y > alturaFinal)
+                break;
+
+            float x = (index % 2 == 0)
+                ? centroX + offsetHorizontal
+                : centroX - offsetHorizontal;
+
+            Vector3 p = new Vector3(x, y, centroZ);
+
+            Gizmos.DrawWireSphere(p, 0.08f);
+
+            index++;
+        }
     }
 }

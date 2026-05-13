@@ -1,27 +1,32 @@
-﻿using TMPro;
+﻿using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.UI;
 
-public class MenuUI : MonoBehaviour
+public class MenuUI_Menu : MonoBehaviour
 {
-   
-
+    [Header("Cenas")]
     public string cenaMenu = "Menu";
     public string cenaJogo = "EscaladaPrototipo";
 
-    
+    [Header("Loading UI")]
+    public GameObject loadingUI;
 
-    // MENU
-
+    // ─────────────────────────────────────────────
+    // INSTAGRAM
+    // ─────────────────────────────────────────────
     public void ReViva()
     {
         if (SceneManager.GetActiveScene().name == cenaMenu)
         {
-            Application.OpenURL("https://www.instagram.com/revivavr/?utm_source=ig_web_button_share_sheet");
+            Application.OpenURL(
+                "https://www.instagram.com/revivavr/?utm_source=ig_web_button_share_sheet"
+            );
         }
     }
 
+    // ─────────────────────────────────────────────
+    // QUIT
+    // ─────────────────────────────────────────────
     public void QuitGame()
     {
         if (SceneManager.GetActiveScene().name == cenaMenu)
@@ -34,11 +39,34 @@ public class MenuUI : MonoBehaviour
         }
     }
 
+    // ─────────────────────────────────────────────
+    // START GAME
+    // ─────────────────────────────────────────────
     public void StartGame()
     {
         if (SceneManager.GetActiveScene().name == cenaMenu)
         {
-            SceneManager.LoadScene(cenaJogo);
+            StartCoroutine(CarregarJogoAsync());
+        }
+    }
+
+    // ─────────────────────────────────────────────
+    // LOAD ASYNC
+    // ─────────────────────────────────────────────
+    IEnumerator CarregarJogoAsync()
+    {
+        // ativa loading na tela
+        if (loadingUI != null)
+            loadingUI.SetActive(true);
+
+        // começa carregar
+        AsyncOperation operation =
+            SceneManager.LoadSceneAsync(cenaJogo);
+
+        // espera terminar
+        while (!operation.isDone)
+        {
+            yield return null;
         }
     }
 }

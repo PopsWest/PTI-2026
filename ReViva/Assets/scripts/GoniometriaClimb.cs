@@ -140,15 +140,35 @@ public class GoniometriaClimb : MonoBehaviour
     // ─────────────────────────────────────────────
     void EncerrarCalibracao()
     {
-        alcanceMaximo = Mathf.Max(maxRight, maxLeft);
+        // máximo detectado
+        float maxDetectado = Mathf.Max(maxRight, maxLeft);
+
+        // ─────────────────────────────────────────────
+        // AJUSTE CLÍNICO
+        //
+        // reduz alguns cm porque:
+        // - paciente compensa com tronco
+        // - tracking do Quest exagera um pouco
+        // - movimento extremo não é confortável
+        //
+        // 5cm = 0.05m
+        // ─────────────────────────────────────────────
+
+        float ajusteClinico = 0.05f;
+
+        // alcance "real útil"
+        alcanceMaximo = Mathf.Max(0f, maxDetectado - ajusteClinico);
 
         calibrando = false;
         calibrado = true;
 
+        // salva padrão = alcance TOTAL
         GameSettings.Instance.alcanceMaximoCM = alcanceMaximo * 100f;
 
         Debug.Log(
-            $"✔ Calibrado | Dir={maxRight * 100f:F1}cm | Esq={maxLeft * 100f:F1}cm | Máx={alcanceMaximo * 100f:F1}cm"
+            $"✔ Calibrado\n" +
+            $"Detectado: {maxDetectado * 100f:F1}cm\n" +
+            $"Ajustado: {alcanceMaximo * 100f:F1}cm"
         );
 
         OnCalibracaoConcluida?.Invoke();
