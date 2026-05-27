@@ -3,7 +3,47 @@ guid: 8e52d58aca08a4740b09d9a96e9493bb
 ModelImporter:
   serializedVersion: 22200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: leaves01
+    second: {fileID: 2100000, guid: 8a95387828323e24997ee35c56489532, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: leaves01.001
+    second: {fileID: 2100000, guid: 8a95387828323e24997ee35c56489532, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: leaves01.002
+    second: {fileID: 2100000, guid: 8a95387828323e24997ee35c56489532, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: leaves01.003
+    second: {fileID: 2100000, guid: 8a95387828323e24997ee35c56489532, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: opaqueShadows
+    second: {fileID: 2100000, guid: 072ff465dc4513f4abea686ac696b210, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: opaqueShadows.001
+    second: {fileID: 2100000, guid: 072ff465dc4513f4abea686ac696b210, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: opaqueShadows.002
+    second: {fileID: 2100000, guid: 072ff465dc4513f4abea686ac696b210, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: opaqueShadows.003
+    second: {fileID: 2100000, guid: 072ff465dc4513f4abea686ac696b210, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

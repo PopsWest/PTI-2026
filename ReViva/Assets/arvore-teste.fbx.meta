@@ -3,7 +3,157 @@ guid: 7062f566c3f93c94f977a706dee8899a
 ModelImporter:
   serializedVersion: 22200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: leaves01
+    second: {fileID: 2100000, guid: 8a95387828323e24997ee35c56489532, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: leaves01.001
+    second: {fileID: 2100000, guid: 8a95387828323e24997ee35c56489532, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: leaves01.002
+    second: {fileID: 2100000, guid: 8a95387828323e24997ee35c56489532, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: leaves01.003
+    second: {fileID: 2100000, guid: 8a95387828323e24997ee35c56489532, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: leaves01.004
+    second: {fileID: 2100000, guid: 8a95387828323e24997ee35c56489532, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: leaves01.006
+    second: {fileID: 2100000, guid: 8a95387828323e24997ee35c56489532, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: leaves01.007
+    second: {fileID: 2100000, guid: 8a95387828323e24997ee35c56489532, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: leaves01.008
+    second: {fileID: 2100000, guid: 8a95387828323e24997ee35c56489532, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: leaves01.009
+    second: {fileID: 2100000, guid: 8a95387828323e24997ee35c56489532, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: leaves02
+    second: {fileID: 2100000, guid: 8a95387828323e24997ee35c56489532, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: opaqueShadows
+    second: {fileID: 2100000, guid: 072ff465dc4513f4abea686ac696b210, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: opaqueShadows.001
+    second: {fileID: 2100000, guid: 072ff465dc4513f4abea686ac696b210, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: opaqueShadows.002
+    second: {fileID: 2100000, guid: 072ff465dc4513f4abea686ac696b210, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: opaqueShadows.003
+    second: {fileID: 2100000, guid: 072ff465dc4513f4abea686ac696b210, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: opaqueShadows.004
+    second: {fileID: 2100000, guid: 072ff465dc4513f4abea686ac696b210, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: opaqueShadows.005
+    second: {fileID: 2100000, guid: 072ff465dc4513f4abea686ac696b210, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: opaqueShadows.006
+    second: {fileID: 2100000, guid: 072ff465dc4513f4abea686ac696b210, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: opaqueShadows.007
+    second: {fileID: 2100000, guid: 072ff465dc4513f4abea686ac696b210, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: opaqueShadows.008
+    second: {fileID: 2100000, guid: 072ff465dc4513f4abea686ac696b210, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: opaqueShadows.009
+    second: {fileID: 2100000, guid: 072ff465dc4513f4abea686ac696b210, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: tree_painterly03
+    second: {fileID: 2100000, guid: e6790fffa88c1d94daad7ac2d80503bb, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: tree_stylizedBark01
+    second: {fileID: 2100000, guid: e6790fffa88c1d94daad7ac2d80503bb, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: tree_stylizedBark01.001
+    second: {fileID: 2100000, guid: e6790fffa88c1d94daad7ac2d80503bb, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: tree_stylizedBark01.002
+    second: {fileID: 2100000, guid: e6790fffa88c1d94daad7ac2d80503bb, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: tree_stylizedBark01.003
+    second: {fileID: 2100000, guid: e6790fffa88c1d94daad7ac2d80503bb, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: tree_stylizedBark01.004
+    second: {fileID: 2100000, guid: e6790fffa88c1d94daad7ac2d80503bb, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: tree_stylizedBark01.006
+    second: {fileID: 2100000, guid: e6790fffa88c1d94daad7ac2d80503bb, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: tree_stylizedBark01.007
+    second: {fileID: 2100000, guid: e6790fffa88c1d94daad7ac2d80503bb, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: tree_stylizedBark01.008
+    second: {fileID: 2100000, guid: e6790fffa88c1d94daad7ac2d80503bb, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: tree_stylizedBark01.009
+    second: {fileID: 2100000, guid: e6790fffa88c1d94daad7ac2d80503bb, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0
