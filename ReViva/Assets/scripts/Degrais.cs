@@ -7,7 +7,7 @@ public class Degrais : MonoBehaviour
     [Header("Referências de Cena")]
     public Transform posicaoComeco;
     public Transform posicaoFinal;
-    public GameObject pedra;
+    public GameObject[] pedras;
 
     [Header("Layer da Montanha")]
     public LayerMask layerMontanha;
@@ -96,9 +96,9 @@ public class Degrais : MonoBehaviour
             Vector3[] direcoes =
             {
                 Vector3.forward,
-                Vector3.back,
-                Vector3.right,
-                Vector3.left
+                //Vector3.back,
+                //Vector3.right,
+                //Vector3.left
             };
 
             foreach (Vector3 dir in direcoes)
@@ -133,8 +133,12 @@ public class Degrais : MonoBehaviour
                 Quaternion rot =
                     Quaternion.LookRotation(-hit.normal);
 
+                if (pedras.Length == 0) return;
+
+                GameObject pedraEscolhida = pedras[Random.Range(0, pedras.Length)];
+
                 Instantiate(
-                    pedra,
+                    pedraEscolhida,
                     posicaoPedra,
                     rot,
                     transform
